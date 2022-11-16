@@ -34,6 +34,7 @@ unsolved = homicide %>%
 sum = merge(homicides_number, unsolved, by = "city")
 
 ```
+
 ```{r}
 sink("test_output")
 test = prop.test(x = 1825, n = 2827) 
@@ -41,9 +42,6 @@ sink()
 tidy = broom::tidy(test)
 tidy
 ```
-
-
-
 
 ```{r}
 pt = sum %>% 
@@ -59,4 +57,28 @@ p = ggplot(pt, aes(estimate, colour = city)) + geom_errorbar(aes(ymin = conf.low
     y = "confidential interval")
 ```
 
+```{r}
+
+sim_mean_sd = function(n, mean, sd) {
+  
+  sim_data = tibble(
+    x = rnorm(30, mean = 0, sd = 5),
+  )
+  
+  sim_data %>% 
+    summarize(
+      mu_hat = mean(x),
+      sigma_hat = sd(x)
+    )
+}
+
+output = vector("list", 5000)
+
+for (i in 1:5000) {
+  output[[i]] = sim_mean_sd(30, 0, 5)
+}
+
+sim_results = bind_rows(output)
+sim_results
+```
 
