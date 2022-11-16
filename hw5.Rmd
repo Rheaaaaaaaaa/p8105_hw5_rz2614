@@ -26,15 +26,14 @@ homicide= read_csv("./homicide-data.csv") %>%
 homicides_number =  homicide %>% 
   group_by(city) %>% 
   summarise(humicides_no = n())
-
-```
-```{r}
 unsolved = homicide %>% 
   group_by(city)  %>% 
   filter(., disposition == "Closed without arrest" | disposition == "Open/No arrest" ) %>% summarise(unsolved_no = n())
-  
+sum = merge(homicides_number, unsolved, by = "city")
+
 ```
 ```{r}
-sum = merge(homicides_number, unsolved, by = "city")
+prop.test(x = 1825, n = 2827) 
 ```
+
 
