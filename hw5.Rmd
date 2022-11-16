@@ -53,5 +53,10 @@ pt = sum %>%
   select(., city, homicides_no, unsolved_no, estimate, conf.low, conf.high)
 ```
 
+```{r}
+p = ggplot(pt, aes(estimate, colour = city)) + geom_errorbar(aes(ymin = conf.low, ymax = conf.high),width = 0.2) + labs(title = "the estimates and CIs for each city",
+    x = "esitimates",
+    y = "confidential interval")
+```
 
 
