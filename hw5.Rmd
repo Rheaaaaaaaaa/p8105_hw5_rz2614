@@ -14,6 +14,8 @@ library(tidyverse)
 library(p8105.datasets)
 library(viridis)
 library(dplyr)
+library(purrr)
+library(broom)
 ```
 
 ```{r}
@@ -25,7 +27,7 @@ homicide= read_csv("./homicide-data.csv") %>%
 ```{r}
 homicides_number =  homicide %>% 
   group_by(city) %>% 
-  summarise(humicides_no = n())
+  summarise(homicides_no = n())
 unsolved = homicide %>% 
   group_by(city)  %>% 
   filter(., disposition == "Closed without arrest" | disposition == "Open/No arrest" ) %>% summarise(unsolved_no = n())
@@ -37,8 +39,19 @@ sink("test_output")
 test = prop.test(x = 1825, n = 2827) 
 sink()
 tidy = broom::tidy(test)
-
-
+tidy
 ```
+
+
+
+
+```{r}
+pt = sum %>% 
+  mutate(value = map2(unsolved_no, homicides_no, ~ prop.test(.x, .y) %>% 
+  tidy())) %>% 
+  unnest(value) %>% 
+  select(., city, homicides_no, unsolved_no, estimate, conf.low, conf.high)
+```
+
 
 
