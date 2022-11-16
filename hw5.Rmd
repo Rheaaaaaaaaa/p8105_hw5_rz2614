@@ -33,7 +33,12 @@ sum = merge(homicides_number, unsolved, by = "city")
 
 ```
 ```{r}
-prop.test(x = 1825, n = 2827) 
+sink("test_output")
+test = prop.test(x = 1825, n = 2827) 
+sink()
+tidy = broom::tidy(test)
+
+
 ```
 
 
