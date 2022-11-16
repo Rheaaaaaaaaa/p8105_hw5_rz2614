@@ -59,26 +59,18 @@ p = ggplot(pt, aes(estimate, colour = city)) + geom_errorbar(aes(ymin = conf.low
 
 ```{r}
 
-sim_mean_sd = function(n, mean, sd) {
+sim_mean_sd = function(n, mu = 0, sigma = 5) {
   
   sim_data = tibble(
-    x = rnorm(30, mean = 0, sd = 5),
+    x = rnorm(30, mean = mu, sd = sigma),
   )
   
-  sim_data %>% 
-    summarize(
-      mu_hat = mean(x),
-      sigma_hat = sd(x)
-    )
+  tt = t.test(sim_data) %>% 
+    broom::tidy() %>% 
+    select(estimate, p.value)
+  tt
 }
-
-output = vector("list", 5000)
-
-for (i in 1:5000) {
-  output[[i]] = sim_mean_sd(30, 0, 5)
-}
-
-sim_results = bind_rows(output)
-sim_results
+rerun(5000, sim_mean_sd(30, 0, 5)) %>% 
+    bind_rows
 ```
 
