@@ -1,0 +1,40 @@
+---
+title: "hw5"
+author: "Ruihan Zhang"
+date: "2022-11-16"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(p8105.datasets)
+library(viridis)
+library(dplyr)
+```
+
+```{r}
+homicide= read_csv("./homicide-data.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(city_state = paste(homicide$city, homicide$state))
+  
+```
+```{r}
+homicides_number =  homicide %>% 
+  group_by(city) %>% 
+  summarise(humicides_no = n())
+
+```
+```{r}
+unsolved = homicide %>% 
+  group_by(city)  %>% 
+  filter(., disposition == "Closed without arrest" | disposition == "Open/No arrest" ) %>% summarise(unsolved_no = n())
+  
+```
+```{r}
+sum = merge(homicides_number, unsolved, by = "city")
+```
+
