@@ -63,68 +63,65 @@ p = pt %>%
 ```
 
 ```{r}
-
-sim_mean_sd = function(size = 30, mu , sigma = 5) {
+t_test = function(mu = 0) {
+  tt = tibble(rnorm(n = 30, mean = mu, sd = 5))
   
-  sim_data = tibble(
-    x = rnorm(n = size, mean = mu, sd = sigma),
-  )
-  
-  tt = t.test(pull(sim_data,x), conf.level = 0.95) %>% 
+  out = t.test(tt) %>% 
     broom::tidy() %>% 
     select(estimate,p.value)
-  tt
-   sim_data %>% 
-     summarise(
-      mu_hat = mean(x),
-      reject = case_when(
-        pull(tt, p.value) < 0.05 ~ mean(x),
-        pull(tt, p.value) >= 0.05 ~ as.numeric("")
-      )
-    )
+  
+  out
 }
+     
 
 ```
 
 ```{r}
-sim_results_df = function(size = 30, mu, sigma = 5) {
-  output = vector(mode = "list", length = 5000)
-  mu = c(0, 1, 2, 3, 4, 5, 6)
-  for (i in 1:5000) {
-     output[[i]] = sim_mean_sd(size = 30, mu, sigma = 5)
-  }
-  output %>% 
-  bind_rows() %>% 
-    summarize(
-      sample = mean(mu_hat, na.rm = TRUE),
-      reject_sa = mean(reject, na.rm = TRUE)
-    )
-}
+mean_df1 = expand_grid(mean = 0, iteration = 1:5000) %>% 
+  mutate(out = map(mean,t_test)) %>% 
+  unnest(out)
+mean_df2 = expand_grid(mean = 1:6, iteration = 1:5000) %>% 
+  mutate(out = map(mean,t_test)) %>% 
+  unnest(out)
+
 ```
 
 
 ```{r}
-muhat =
-  tibble(
-    mu = c(0, 1, 2, 3, 4, 5, 6),
-    hat = map(mu, sim_results_df)
-  ) %>%  
-  unnest(hat) %>% 
-  pivot_longer(
-    sample:reject_sa,
-    names_to = "sample",
-    values_to = "estimate_mean"
-  )
+mean_df2 %>%
+  group_by(mean) %>% 
+  summarize(mean_estimate = mean(estimate,na.rm = TRUE)) %>% 
+  ggplot(aes(x = mean,y = mean_estimate)) +
+  scale_x_continuous(limits = c(1,6), breaks = seq(1,6,1)) + 
+  geom_point() + geom_path() +
+  labs(x = "the true value of μ",y = "the proportion of times the null rejected (the power of the test)",title = "the association between effect size and power")
+
+  
 ```
+
+When the true value of μ increases, the proportion of times the null rejected (the power of the test) increases. 
 
 ```{r}
-muhat %>% ggplot(aes(x=mu, y =estimate_mean)) + geom_point()+geom_smooth()+
-  labs(
-    x = "the true value of μ",
-    y = "the proportion of times the null rejected (the power of the test)",
-    title = "the association between effect size and power"
-    )
+reject = mean_df2 %>% 
+  filter(p.value < 0.05) %>% group_by(mean) %>% 
+  summarize(mean_estimate = mean(estimate,na.rm = TRUE)) %>% 
+  ungroup()
+
+estimate = mean_df2 %>% 
+  group_by(mean) %>% 
+  summarize(mean_estimate = mean(estimate,na.rm = TRUE)) %>% 
+  ungroup()
+  
+ggplot(estimate,aes(x = mean, y = mean_estimate)) +
+  geom_line(data = estimate ,aes(colour = "estimate mean")) +
+  geom_line(data = reject, aes(colour = "reject mean")) +
+  geom_point(data = estimate, colour = "purple") +
+  geom_point(data = reject,colour = "pink") +
+  scale_x_continuous(limits = c(1,6), breaks = seq(1,6,1)) +
+  labs(x = "the true value of μ",y = "the average estimate of  μ̂" )
+
 ```
 
 
+As the true value of μ increases, the value of the estimated mean approaches to the value of the rejected mean, because the power increases with increasing effect size. 
 
