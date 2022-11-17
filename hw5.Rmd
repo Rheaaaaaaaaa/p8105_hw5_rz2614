@@ -55,7 +55,7 @@ pt = sum %>%
 ```
 
 ```{r}
-p = pt %>% 
+ pt %>% 
   mutate(city = fct_reorder(city, estimate)) %>% 
   ggplot(aes(x= city, y = estimate)) +geom_point() + geom_errorbar(aes(ymin = conf.low, ymax = conf.high),width = 0.2) +theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + labs(title = "the estimates and CIs for each city",
     x = "esitimates",
