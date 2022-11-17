@@ -85,7 +85,16 @@ mean_df2 = expand_grid(mean = 1:6, iteration = 1:5000) %>%
   unnest(out)
 
 ```
-
+```{r}
+mean_df2 %>%
+  group_by(mean) %>% 
+  summarize(rejection = sum(p.value < 0.05)/5000) %>% 
+  ggplot(aes(x = mean,y = rejection)) +
+  scale_x_continuous(limits = c(1,6), breaks = seq(1,6,1)) + 
+  geom_point() + geom_path() +
+  labs(x = "the true value of μ",y = "the proportion of times the null rejected (the power of the test)",title = "the association between effect size and power")
+```
+As the true value of μ increases, the proportion of times the null rejected (the power of the test) increases.
 
 ```{r}
 mean_df2 %>%
@@ -94,12 +103,12 @@ mean_df2 %>%
   ggplot(aes(x = mean,y = mean_estimate)) +
   scale_x_continuous(limits = c(1,6), breaks = seq(1,6,1)) + 
   geom_point() + geom_path() +
-  labs(x = "the true value of μ",y = "the proportion of times the null rejected (the power of the test)",title = "the association between effect size and power")
+  labs(x = "the true value of μ",y = "the average estimate of μ̂")
 
   
 ```
 
-When the true value of μ increases, the proportion of times the null rejected (the power of the test) increases. 
+
 
 ```{r}
 reject = mean_df2 %>% 
